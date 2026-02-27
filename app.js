@@ -301,9 +301,10 @@
       generationConfig: { maxOutputTokens: 800, temperature: 0.7 },
     };
     if (contents.length > 0) body.contents = contents;
+    const modelId = "gemini-1.5-flash"; // ユーザー入力に関わらず固定
     const res = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/" +
-        (aiSettings.model.trim() || "gemini-1.5-flash") +
+      "https://generativelanguage.googleapis.com/v1/models/" +
+        modelId +
         ":generateContent?key=" +
         encodeURIComponent(aiSettings.apiKey.trim()),
       {
@@ -461,6 +462,35 @@
       span.textContent = bbt.value;
       inner.appendChild(span);
     }
+  }
+
+  function appendCycleDayToCell(inner, dateObj) {
+    if (!dateObj) return;
+    const date = new Date(dateObj);
+    if (isNaN(date.getTime())) return;
+    const phaseForDate = getCyclePhase(new Date(date));
+    if (!phaseForDate) return;
+    const cycleDay = getCycleDay(date, phaseForDate);
+    if (typeof cycleDay !== "number" || cycleDay < 1) return;
+    const dateStr = formatDate(date);
+    const hasTiming = timingRecords.some((r) => r.date === dateStr);
+
+    const row = document.createElement("div");
+    row.className = "cal-day-cycle-row";
+
+    const spanCycle = document.createElement("span");
+    spanCycle.className = "cal-day-cycle";
+    spanCycle.textContent = "d" + cycleDay;
+    row.appendChild(spanCycle);
+
+    if (hasTiming) {
+      const spanHeart = document.createElement("span");
+      spanHeart.className = "cal-day-cycle-heart";
+      spanHeart.textContent = "♥";
+      row.appendChild(spanHeart);
+    }
+
+    inner.appendChild(row);
   }
 
   function getCycleDay(today, phase) {
@@ -1047,6 +1077,7 @@
       const inner = document.createElement("div");
       inner.className = "cal-day-inner";
       inner.innerHTML = "<span>" + prevMonth.getDate() + "</span>";
+      appendCycleDayToCell(inner, prevMonth);
       appendBBTToCell(inner, dateStrPrev);
       cell.appendChild(inner);
       const hasRecorded = isDateInPeriod(dateStrPrev) || isOvulationMarked(dateStrPrev);
@@ -1074,6 +1105,7 @@
       const inner = document.createElement("div");
       inner.className = "cal-day-inner";
       inner.innerHTML = `<span>${d}</span>`;
+      appendCycleDayToCell(inner, date);
       appendBBTToCell(inner, dateStr);
       cell.appendChild(inner);
       if (formatDate(date) === todayStr) cell.classList.add("today");
@@ -1103,6 +1135,7 @@
       const inner = document.createElement("div");
       inner.className = "cal-day-inner";
       inner.innerHTML = "<span>" + (i + 1) + "</span>";
+      appendCycleDayToCell(inner, nextMonth);
       appendBBTToCell(inner, dateStrNext);
       cell.appendChild(inner);
       const hasRecordedNext = isDateInPeriod(dateStrNext) || isOvulationMarked(dateStrNext);
@@ -1179,38 +1212,145 @@
       return;
     }
 
-    const values = bbtRecords.map((r) => r.value);
-    const minT = Math.min(...values);
-    const maxT = Math.max(...values);
-    const range = maxT - minT || 0.5;
-    const low = minT - 0.2;
-    const high = maxT + 0.2;
-    const height = 160;
-    const width = Math.min(400, area.offsetWidth || 320);
+    const height = 480;
+    const dayCount = Math.max(
+      1,
+      new Set(bbtRecords.map((r) => r.date)).size
+    );
+    const baseWidth = area.offsetWidth || 320;
+    const width = Math.max(baseWidth, 40 + dayCount * 30); // 日数に応じて横に長く（横スクロール）
+    const pad = { top: 10, right: 10, bottom: 26, left: 34 };
+    const chartW = width - pad.left - pad.right;
+    const chartH = height - pad.top - pad.bottom;
+
+    const minYAxis = 34.0;
+    const maxYAxis = 42.0;
+    const tempRange = maxYAxis - minYAxis;
+
+    const parseBBTDate = (d) => new Date(d).getTime();
+    const firstDateMs = parseBBTDate(bbtRecords[0].date);
+    const lastDateMs = parseBBTDate(bbtRecords[bbtRecords.length - 1].date);
+    const dateRange = Math.max(1, lastDateMs - firstDateMs);
+
+    const xForDate = (ms) => pad.left + ((ms - firstDateMs) / dateRange) * chartW;
+    const yForTemp = (t) =>
+      pad.top + (1 - (Math.min(Math.max(t, minYAxis), maxYAxis) - minYAxis) / tempRange) * chartH;
 
     const points = bbtRecords
-      .map((r, i) => {
-        const x = (i / (bbtRecords.length - 1)) * (width - 40) + 20;
-        const y = height - 20 - ((r.value - low) / (high - low)) * (height - 40);
+      .map((r) => {
+        const x = xForDate(parseBBTDate(r.date));
+        const y = yForTemp(typeof r.value === "number" ? r.value : parseFloat(r.value));
         return `${x},${y}`;
       })
       .join(" ");
 
+    const yTicks = [];
+    for (let t = minYAxis; t <= maxYAxis + 1e-6; t += 0.1) {
+      yTicks.push(Math.round(t * 10) / 10);
+    }
+
+    const gridLines = yTicks
+      .map((t) => {
+        const y = yForTemp(t);
+        const isInteger = Math.abs(t - Math.round(t)) < 0.001; // 34,35,...,42
+        const stroke = isInteger ? "rgba(0,0,0,0.28)" : "rgba(0,0,0,0.07)";
+        const strokeWidth = isInteger ? 1.1 : 0.6;
+        let label = "";
+        if (isInteger) {
+          label = Math.round(t).toString();
+        } else {
+          const frac = Math.round((t - Math.floor(t)) * 10); // 0〜9
+          label = "." + frac;
+        }
+        return `
+          <line x1="${pad.left}" y1="${y}" x2="${pad.left + chartW}" y2="${y}"
+            stroke="${stroke}" stroke-width="${strokeWidth}" />
+          <text x="${pad.left - 4}" y="${y + 3}" font-size="9" text-anchor="end" fill="var(--text-muted)">${label}</text>
+        `;
+      })
+      .join("");
+
+    const verticalLines = bbtRecords
+      .map((r) => {
+        const ms = parseBBTDate(r.date);
+        const x = xForDate(ms);
+        return `
+          <line x1="${x}" y1="${pad.top}" x2="${x}" y2="${pad.top + chartH}"
+            stroke="rgba(0,0,0,0.05)" stroke-width="0.6" />
+        `;
+      })
+      .join("");
+
+    const dayStep = Math.max(1, Math.ceil(bbtRecords.length / 10));
+    const xLabels = bbtRecords
+      .filter((_, i) => i % dayStep === 0 || i === bbtRecords.length - 1)
+      .map((r) => {
+        const ms = parseBBTDate(r.date);
+        const x = xForDate(ms);
+        const label = r.date.slice(5).replace("-", "/");
+        return `<text x="${x}" y="${height - 6}" font-size="9" text-anchor="middle" fill="var(--text-muted)">${label}</text>`;
+      })
+      .join("");
+
     const polyline = `<polyline fill="none" stroke="var(--accent)" stroke-width="2" points="${points}"/>`;
-    const labels = bbtRecords
-      .filter((_, i) => i % Math.ceil(bbtRecords.length / 7) === 0 || i === bbtRecords.length - 1)
-      .map(
-        (r, i) =>
-          `<text x="${20 + (i * (width - 40)) / Math.max(1, Math.ceil(bbtRecords.length / 7))}" y="${height - 2}" font-size="10" fill="var(--text-muted)">${r.date.slice(5)}</text>`
-      )
+
+    const pointDots = bbtRecords
+      .map((r) => {
+        const x = xForDate(parseBBTDate(r.date));
+        const v = typeof r.value === "number" ? r.value : parseFloat(r.value);
+        const y = yForTemp(v);
+        return `<circle cx="${x}" cy="${y}" r="2.3" fill="var(--surface)" stroke="var(--accent)" stroke-width="1"/>`;
+      })
       .join("");
 
     area.innerHTML = `
-      <svg width="100%" viewBox="0 0 ${width} ${height + 20}" preserveAspectRatio="xMidYMid meet">
+      <svg width="100%" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">
+        ${gridLines}
+        ${verticalLines}
         ${polyline}
-        ${labels}
+        ${pointDots}
+        ${xLabels}
       </svg>
     `;
+  }
+
+  async function recognizeBBTFromImage(file, onStatus) {
+    const msg = function (text) {
+      if (typeof onStatus === "function") onStatus(text);
+    };
+    if (!window.Tesseract || !Tesseract.recognize) {
+      msg("この端末では画像からの読み取りに対応していません。");
+      return null;
+    }
+    try {
+      msg("画像を解析しています…（数十秒かかることがあります）");
+      const result = await Tesseract.recognize(file, "eng", {
+        logger: function (m) {
+          if (m.status === "recognizing text" && typeof m.progress === "number") {
+            const pct = Math.round(m.progress * 100);
+            msg("画像を解析しています… " + pct + "%");
+          }
+        },
+      });
+      const text = (result && result.data && result.data.text) || "";
+      const matches = text.match(/(3[5-9]\.\d{1,2}|40\.\d{1,2})/g);
+      if (!matches) {
+        msg("体温の数字が見つかりませんでした。画像をアップで撮るか、もう一度試してください。");
+        return null;
+      }
+      for (let i = 0; i < matches.length; i++) {
+        const v = roundBBT(matches[i]);
+        if (v != null) {
+          msg("体温 " + v.toFixed(2) + "℃ を読み取りました。内容を確認して「追加」を押してください。");
+          return v;
+        }
+      }
+      msg("体温の数字が見つかりませんでした。");
+      return null;
+    } catch (e) {
+      msg("画像の解析に失敗しました。もう一度試してください。");
+      return null;
+    }
   }
 
   function renderBBTList() {
@@ -1674,7 +1814,9 @@
     const modelEl = document.getElementById("ai-model");
     if (providerEl) providerEl.value = aiSettings.provider || "openai";
     if (keyEl) keyEl.value = aiSettings.apiKey || "";
-    if (modelEl) modelEl.value = aiSettings.model || (aiSettings.provider === "gemini" ? "gemini-1.5-flash" : "gpt-4o-mini");
+    if (modelEl) {
+      modelEl.value = aiSettings.model || (aiSettings.provider === "gemini" ? "gemini-1.5-flash" : "gpt-4o-mini");
+    }
   }
 
   function init() {
@@ -1992,6 +2134,21 @@
       msgEl.className = "msg success";
     });
 
+    const aiResetBtn = document.getElementById("ai-reset-key-btn");
+    if (aiResetBtn) {
+      aiResetBtn.addEventListener("click", function () {
+        aiSettings.apiKey = "";
+        saveAISettings();
+        const keyInput = document.getElementById("ai-api-key");
+        if (keyInput) keyInput.value = "";
+        const msgEl = document.getElementById("ai-settings-msg");
+        if (msgEl) {
+          msgEl.textContent = "APIキーをリセットしました。";
+          msgEl.className = "msg success";
+        }
+      });
+    }
+
     const recordBbtBtn = document.getElementById("record-bbt-btn");
     if (recordBbtBtn) recordBbtBtn.addEventListener("click", function () {
       const value = roundBBT(document.getElementById("record-bbt").value);
@@ -2055,6 +2212,41 @@
 
     const todayStr = formatDate(new Date());
     document.getElementById("bbt-date").value = todayStr;
+
+    const bbtImageBtn = document.getElementById("bbt-from-image-btn");
+    const bbtImageInput = document.getElementById("bbt-screenshot-input");
+    const bbtImageMsgEl = document.getElementById("bbt-from-image-msg");
+    if (bbtImageBtn && bbtImageInput) {
+      bbtImageBtn.addEventListener("click", function () {
+        if (!window.Tesseract) {
+          if (bbtImageMsgEl) {
+            bbtImageMsgEl.textContent = "画像から読み取る機能を利用できません。ネットワーク環境を確認して、もう一度開き直してください。";
+            bbtImageMsgEl.className = "msg error";
+          }
+          return;
+        }
+        bbtImageInput.value = "";
+        bbtImageInput.click();
+      });
+      bbtImageInput.addEventListener("change", function () {
+        const file = this.files && this.files[0];
+        if (!file) return;
+        const msgFn = function (text) {
+          if (bbtImageMsgEl) {
+            bbtImageMsgEl.textContent = text;
+            bbtImageMsgEl.className = "msg";
+          }
+        };
+        recognizeBBTFromImage(file, msgFn).then(function (value) {
+          if (value == null) return;
+          const dateInput = document.getElementById("bbt-date");
+          const valInput = document.getElementById("bbt-value");
+          if (dateInput && !dateInput.value) dateInput.value = formatDate(new Date());
+          if (valInput) valInput.value = value.toFixed(2);
+        });
+        this.value = "";
+      });
+    }
 
     renderDashboard();
     renderCalendar();

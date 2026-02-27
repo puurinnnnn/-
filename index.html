@@ -189,6 +189,12 @@
             <label>体温 (℃) <input type="number" id="bbt-value" step="0.01" min="35" max="40" placeholder="36.36" /></label>
             <button type="button" id="add-bbt-btn">追加</button>
           </div>
+          <div class="bbt-from-image">
+            <p class="bbt-from-image-hint">他アプリのスクリーンショットから体温を読み取ります（数字がはっきり写っている画像推奨）。</p>
+            <button type="button" id="bbt-from-image-btn" class="btn-secondary bbt-from-image-btn">スクショから体温を読み取る</button>
+            <input type="file" id="bbt-screenshot-input" accept="image/*" class="hidden" />
+            <p id="bbt-from-image-msg" class="msg"></p>
+          </div>
           <div id="bbt-chart-area" class="bbt-chart-area">
             <p class="hint">記録を追加するとグラフが表示されます</p>
           </div>
@@ -259,6 +265,7 @@
             <label>APIキー <input type="password" id="ai-api-key" placeholder="sk-..." autocomplete="off" /></label>
             <span class="form-hint">OpenAI: APIキーは OpenAI のサイトで取得。Gemini: Google AI Studio で取得（無料枠あり）</span>
           </div>
+          <button type="button" id="ai-reset-key-btn" class="btn-secondary">APIキーをリセット</button>
           <div class="form-group">
             <label>モデル名 <input type="text" id="ai-model" placeholder="例: gpt-4o-mini または gemini-1.5-flash" /></label>
           </div>
@@ -288,6 +295,7 @@
     </main>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+  <script src="https://unpkg.com/tesseract.js@5.0.1/dist/tesseract.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

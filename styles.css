@@ -262,18 +262,23 @@ body {
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
+  gap: 0;
   font-size: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .cal-day {
   aspect-ratio: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
+  align-items: stretch;
+  justify-content: stretch;
   min-height: 40px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
 }
 
 .cal-day.other-month {
@@ -287,7 +292,11 @@ body {
 /* 実測は目立たせる（塗りつぶし） */
 .cal-day.period-recorded { background: var(--period) !important; border-left: none !important; color: var(--text); }
 .cal-day.ovulation-recorded { background: var(--ovulation) !important; border-left: none !important; color: var(--text); font-weight: 600; }
-.cal-day.today { box-shadow: 0 0 0 2px var(--accent); }
+.cal-day.today {
+  box-shadow: none;
+  border: 2px solid var(--accent);
+  margin: -1px; /* 周囲のマスとの隙間を抑える */
+}
 .cal-day-clickable:hover { opacity: 0.9; }
 
 /* カレンダー用ポップオーバー */
@@ -486,12 +495,28 @@ body {
   font-size: 0.95rem;
 }
 
-.bbt-chart-area {
-  min-height: 180px;
+.bbt-from-image {
   margin-bottom: 16px;
+}
+
+.bbt-from-image-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0 0 6px;
+}
+
+.bbt-from-image-btn {
+  margin-bottom: 4px;
+}
+
+.bbt-chart-area {
+  min-height: 220px;
+  max-height: 260px;
+  margin-bottom: 0;
   padding: 12px;
   background: var(--bg);
   border-radius: 12px;
+  overflow: auto; /* グラフ領域をスクロール可能に */
 }
 
 .bbt-chart-area .hint {
@@ -504,6 +529,7 @@ body {
 
 .bbt-list {
   font-size: 0.9rem;
+  display: none; /* グラフ下の一覧は非表示 */
 }
 
 .bbt-item {
@@ -762,17 +788,35 @@ body {
 .cal-day-inner {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
   width: 100%;
   height: 100%;
+  padding: 2px 4px;
+}
+
+.cal-day-cycle-row {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 1px;
+}
+
+.cal-day-cycle {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.cal-day-cycle-heart {
+  font-size: 0.7rem;
+  color: #e05a6a;
+  margin-left: 2px;
 }
 
 .cal-day-bbt {
   display: block;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 500;
-  margin-top: 2px;
+  margin-top: 1px;
   line-height: 1.2;
 }
 .cal-day-bbt-before { color: #4db8d0; }
@@ -1121,10 +1165,13 @@ body {
   display: flex;
   gap: 8px;
   margin-bottom: 10px;
+  align-items: center;
 }
 
 .chat-input {
   flex: 1;
+  min-width: 0;
+  flex-shrink: 1;
   padding: 12px 14px;
   border: 1px solid var(--border);
   border-radius: 24px;
@@ -1133,7 +1180,7 @@ body {
 }
 
 .chat-send-btn {
-  padding: 12px 20px;
+  padding: 10px 16px;
   background: var(--accent);
   color: var(--surface);
   border: none;
@@ -1142,6 +1189,7 @@ body {
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .chat-send-btn:disabled {
