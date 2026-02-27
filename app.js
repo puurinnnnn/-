@@ -292,15 +292,25 @@
     const systemMsg = messages.find((m) => m.role === "system");
     const systemContent = systemMsg?.content || AI_SYSTEM_PROMPT;
     const rest = messages.filter((m) => m.role !== "system");
-    const contents = rest.map((m) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
+
+    const contents = [];
+    if (systemContent) {
+      contents.push({
+        role: "user",
+        parts: [{ text: systemContent }],
+      });
+    }
+    rest.forEach((m) => {
+      contents.push({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      });
+    });
+
     const body = {
-      systemInstruction: { parts: [{ text: systemContent }] },
+      contents,
       generationConfig: { maxOutputTokens: 800, temperature: 0.7 },
     };
-    if (contents.length > 0) body.contents = contents;
     const modelId = "gemini-1.5-flash"; // ユーザー入力に関わらず固定
     const res = await fetch(
       "https://generativelanguage.googleapis.com/v1/models/" +
