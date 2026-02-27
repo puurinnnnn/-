@@ -1,0 +1,1160 @@
+:root {
+  --bg: #fef5f8;
+  --surface: #fff;
+  --text: #3d2c34;
+  --text-muted: #8b6b7a;
+  --accent: #e8a4b4;
+  --accent-soft: #fce4eb;
+  --period: #f5b8c8;
+  --fertile: #f5f0a8;
+  --fertile-light: #fdfce8;
+  --ovulation: #e8ed6a;
+  --border: #f0e0e8;
+  --shadow: rgba(180, 120, 140, 0.08);
+  --font-sans: "Noto Sans JP", sans-serif;
+  --font-serif: "Cormorant Garamond", serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.hidden {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 0 16px 24px;
+}
+
+.header {
+  padding: 20px 0 16px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 10;
+}
+
+.logo {
+  font-family: "Hachi Maru Pop", cursive;
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin: 0 0 12px;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+}
+
+.nav {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.nav-btn {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.nav-btn:hover {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.nav-btn.active {
+  background: var(--accent);
+  color: var(--surface);
+}
+
+.main {
+  padding-top: 20px;
+}
+
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.card {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 12px var(--shadow);
+}
+
+.card h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 14px;
+  color: var(--text);
+}
+
+.description {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 16px;
+}
+
+.today-status {
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.next-period {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+.fertile-window {
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.msg {
+  font-size: 0.85rem;
+  margin: 8px 0 0;
+  min-height: 1.4em;
+}
+
+.msg.success { color: #4a7c59; }
+.msg.error { color: #b85450; }
+
+/* クイック記録 */
+.quick-actions .bbt-quick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.bbt-quick label {
+  width: 100%;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.bbt-quick input {
+  flex: 1;
+  min-width: 80px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.bbt-quick button,
+#save-settings-btn,
+#add-bbt-btn {
+  padding: 10px 18px;
+  background: var(--accent);
+  color: var(--surface);
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.bbt-quick button:hover,
+#save-settings-btn:hover,
+#add-bbt-btn:hover {
+  opacity: 0.9;
+}
+
+/* カレンダー */
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cal-nav {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 1.4rem;
+  line-height: 1;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cal-nav:hover {
+  background: var(--accent);
+  color: var(--surface);
+}
+
+#cal-title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.leg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.leg::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.leg-period::before { background: var(--period); }
+.leg-fertile::before { background: var(--fertile); }
+.leg-ovulation::before { background: var(--ovulation); }
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  font-size: 0.8rem;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  min-height: 40px;
+}
+
+.cal-day.other-month {
+  color: #bbb;
+}
+
+/* 予定は控えめ（薄い背景・細い線） 生理＝紫系・排卵＝黄系 */
+.cal-day.period { background: rgba(245, 184, 200, 0.4); border-left: 3px solid rgba(220, 140, 160, 0.65); }
+.cal-day.fertile { background: rgba(245, 240, 168, 0.45); border-left: 3px solid rgba(200, 200, 80, 0.6); }
+.cal-day.ovulation { background: rgba(232, 237, 106, 0.5); border-left: 3px solid rgba(180, 185, 60, 0.7); }
+/* 実測は目立たせる（塗りつぶし） */
+.cal-day.period-recorded { background: var(--period) !important; border-left: none !important; color: var(--text); }
+.cal-day.ovulation-recorded { background: var(--ovulation) !important; border-left: none !important; color: var(--text); font-weight: 600; }
+.cal-day.today { box-shadow: 0 0 0 2px var(--accent); }
+.cal-day-clickable:hover { opacity: 0.9; }
+
+/* カレンダー用ポップオーバー */
+.calendar-card { position: relative; }
+.cal-popover {
+  display: none;
+  position: absolute;
+  z-index: 20;
+  background: var(--surface);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px var(--shadow);
+  padding: 10px 12px;
+  min-width: 120px;
+  border: 1px solid var(--border);
+}
+.cal-popover.is-open { display: block; }
+.cal-popover-title {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.cal-popover-btn {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+}
+.cal-popover-btn:last-child { margin-bottom: 0; }
+.cal-popover-btn:hover { background: var(--accent); color: var(--surface); }
+
+/* その日の記録モーダル */
+.day-record-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  align-items: flex-end;
+  justify-content: center;
+}
+.day-record-modal.is-open { display: flex; }
+.day-record-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+}
+.day-record-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border-radius: 16px 16px 0 0;
+  padding: 16px 20px 24px;
+  box-shadow: 0 -4px 20px var(--shadow);
+}
+.day-record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.day-record-header h3 { margin: 0; font-size: 1.1rem; }
+.day-record-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--accent-soft);
+  border-radius: 50%;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text);
+}
+.day-record-body { margin-bottom: 16px; }
+.day-record-row {
+  margin-bottom: 14px;
+}
+.day-record-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.day-record-row input[type="number"],
+.day-record-row input[type="text"] {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100%;
+  max-width: 120px;
+}
+.day-record-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.day-record-chips .btn-chip { margin: 0; }
+.day-record-med-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 0.9rem;
+}
+.day-record-med-item button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.day-record-med-item button:hover { color: #b85450; }
+.day-record-med-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.day-record-med-chips .btn-chip { margin: 0; }
+#day-record-med-input { margin-right: 8px; margin-bottom: 6px; }
+.day-record-photo-input { position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none; }
+.day-record-photo-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.day-record-photo-thumb {
+  max-width: 120px;
+  max-height: 120px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.day-record-photo-remove {
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.day-record-photo-remove:hover { color: #b85450; border-color: #b85450; }
+
+/* カレンダー下の周期入力（2列: 実測平均・自分で入力） */
+.calendar-phase-hint {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.phase-table-wrap { margin-bottom: 12px; overflow-x: auto; }
+.phase-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.phase-table th, .phase-table td { padding: 8px 10px; text-align: left; vertical-align: middle; }
+.phase-table thead th { border-bottom: 1px solid var(--border); color: var(--text-muted); font-weight: 500; font-size: 0.85rem; }
+.phase-label-cell { color: var(--text); width: 38%; }
+.phase-avg-cell { color: var(--text-muted); width: 28%; }
+.phase-input-cell { width: 34%; }
+.phase-input-cell input {
+  width: 56px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+.leg-period-recorded::before { background: var(--period); }
+.leg-ovulation-recorded::before { background: var(--ovulation); }
+
+/* 基礎体温 */
+.bbt-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.bbt-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.bbt-form input {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.bbt-chart-area {
+  min-height: 180px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--bg);
+  border-radius: 12px;
+}
+
+.bbt-chart-area .hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 24px 0;
+}
+
+.bbt-list {
+  font-size: 0.9rem;
+}
+
+.bbt-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.bbt-item:last-child { border-bottom: none; }
+
+.bbt-item button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.bbt-item button:hover {
+  color: #b85450;
+}
+
+.visit-form { margin-bottom: 20px; }
+.visit-form .form-group { margin-bottom: 14px; }
+.visit-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: var(--font-sans);
+  resize: vertical;
+  min-height: 60px;
+}
+.visit-list { margin-top: 16px; }
+.visit-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+.visit-item:last-child { border-bottom: none; }
+.visit-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.visit-item-header strong { color: var(--text); }
+.visit-delete {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 6px;
+  line-height: 1;
+}
+.visit-delete:hover { color: #b85450; }
+.visit-item-content,
+.visit-item-results {
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-top: 4px;
+}
+.visit-item-results { color: var(--text-muted); font-size: 0.85rem; }
+
+/* 設定 */
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.form-group input {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+#save-settings-btn {
+  margin-top: 8px;
+}
+
+.form-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* オンボーディング */
+.onboarding {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.onboarding.hidden {
+  display: none;
+}
+
+.onboarding-inner {
+  max-width: 360px;
+  width: 100%;
+}
+
+.onboarding-lead {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin: 0 0 20px;
+}
+
+.onboarding-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 20px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: var(--surface);
+  border: none;
+  border-radius: 12px;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  opacity: 0.95;
+}
+
+.btn-secondary {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  margin-bottom: 8px;
+  background: var(--accent-soft);
+  color: var(--text);
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: var(--accent);
+  color: var(--surface);
+}
+
+.share-url-box {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.share-url-output {
+  width: 100%;
+  min-height: 4rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  font-family: var(--font-sans);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  resize: vertical;
+  background: var(--surface);
+}
+
+/* 記録画面 */
+.record-section {
+  margin-bottom: 20px;
+}
+
+.record-section h3 {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin: 0 0 8px;
+}
+
+.inline-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.inline-input input {
+  width: 80px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.chip-group,
+.symptom-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.btn-chip,
+.symptom-chip {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 20px;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: var(--text);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-chip:hover,
+.symptom-chip:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.symptom-chip.selected,
+.btn-chip.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--surface);
+}
+
+.record-status {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 8px 0 0;
+}
+
+/* カレンダー記録マーク */
+.cal-day-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.cal-day-bbt {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 500;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+.cal-day-bbt-before { color: #4db8d0; }
+.cal-day-bbt-after { color: #e8a4b4; }
+
+/* 免責 */
+.disclaimer {
+  background: var(--accent-soft);
+}
+
+.disclaimer p {
+  font-size: 0.85rem;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* 今日の状態カード内 */
+.today-cycle-day-banner {
+  font-size: 1rem;
+  color: var(--text);
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, var(--accent-soft) 0%, rgba(255,255,255,0.9) 100%);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.today-banner-line1 { display: block; font-size: 1.1rem; font-weight: 600; white-space: nowrap; }
+.today-banner-line2 { display: block; margin-top: 4px; font-size: 0.9rem; color: #b85a6a; }
+
+.today-phase-bar {
+  display: flex;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px var(--shadow);
+}
+.today-phase-seg {
+  position: relative;
+  flex: none;
+  min-width: 0;
+  padding: 6px 3px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text);
+  box-sizing: border-box;
+}
+.today-phase-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  margin-left: -1.5px;
+  background: rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+.today-phase-seg.phase-menstrual { background: #e0d4f0; }
+.today-phase-seg.phase-follicular { background: #d4e8f5; }
+.today-phase-seg.phase-ovulatory { background: #f5d4e0; }
+.today-phase-seg.phase-luteal { background: #f5f0c8; }
+.today-phase-seg.is-current {
+  font-weight: 600;
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,0.15);
+}
+
+.today-cycle-day {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.today-day-axis {
+  margin-bottom: 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.today-day-axis-inner {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 2px;
+  min-width: max-content;
+  padding: 2px 0;
+}
+.today-day-axis .day-num {
+  flex: 0 0 auto;
+  min-width: 28px;
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+.today-day-axis .day-num.is-today {
+  color: var(--text);
+  font-weight: 700;
+  background: var(--accent-soft);
+  border-radius: 50%;
+}
+
+.today-hormone-bar {
+  margin: 8px 0 12px;
+  min-height: 140px;
+}
+.hormone-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.hormone-legend-item { white-space: nowrap; }
+
+.today-hormone-table-wrap {
+  margin: 16px 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.hormone-ref-table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  table-layout: fixed;
+}
+.hormone-ref-table th,
+.hormone-ref-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border: 1px solid var(--border);
+  word-break: break-word;
+}
+.hormone-ref-table thead th {
+  background: var(--text-muted);
+  color: var(--surface);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+.hormone-ref-table tbody tr:nth-child(even) { background: rgba(248,248,250,0.8); }
+.hormone-ref-table tbody tr.is-current {
+  background: #faf5d8 !important;
+  border-left: 4px solid #d4a84b;
+  font-weight: 600;
+}
+.hormone-ref-table tbody tr.is-current td { color: var(--text); }
+.hormone-ref-table tbody td { color: var(--text); }
+.hormone-ref-table .col-phase { width: 28%; }
+.hormone-ref-table .col-e2, .hormone-ref-table .col-p4, .hormone-ref-table .col-lh { width: 24%; }
+
+.hormone-graph-svg {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  min-height: 200px;
+}
+
+.today-status-panel {
+  margin-top: 18px;
+  padding: 16px 18px;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+.today-status-block {
+  margin-bottom: 14px;
+}
+.today-status-block:last-child { margin-bottom: 0; }
+.today-status-block h4 {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.today-status-block p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.today-bbt-box {
+  padding: 10px 14px 10px 14px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+.today-bbt-inline {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+.today-bbt-inline label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+.today-bbt-inline input {
+  min-width: 72px;
+  width: 72px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+.today-bbt-inline .btn-primary {
+  width: auto;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+.today-bbt-box .msg { margin: 6px 0 0; min-height: 0; line-height: 1.3; }
+.today-bbt-box .msg:empty { display: none; }
+
+
+/* 生理タブ内カレンダー */
+.period-calendar-wrap { margin-bottom: 16px; }
+.period-calendar-wrap .calendar-header { margin-bottom: 8px; }
+.period-cal-title { margin: 0; font-size: 1rem; }
+.period-calendar-grid .cal-day { min-height: 36px; font-size: 0.8rem; }
+.period-calendar-grid .cal-day.period-recorded { background: var(--period); }
+
+.today-ai-advice {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--accent-soft);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.today-ai-advice.loading {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.today-ai-btn {
+  margin-top: 8px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 16px;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.today-ai-btn:hover {
+  background: var(--accent-soft);
+}
+
+/* 生理タブ */
+.period-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+
+.period-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.period-form input {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.period-list {
+  font-size: 0.9rem;
+}
+
+.period-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.period-item:last-child {
+  border-bottom: none;
+}
+
+.period-item button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.period-item button:hover {
+  color: #b85450;
+}
+
+/* AIチャット */
+.chat-card .chat-messages {
+  min-height: 200px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 12px 0;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chat-msg {
+  max-width: 88%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.chat-msg.user {
+  align-self: flex-end;
+  background: var(--accent);
+  color: var(--surface);
+}
+
+.chat-msg.assistant {
+  align-self: flex-start;
+  background: var(--accent-soft);
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+}
+
+.chat-send-btn {
+  padding: 12px 20px;
+  background: var(--accent);
+  color: var(--surface);
+  border: none;
+  border-radius: 24px;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.chat-send-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 設定のセレクト */
+.form-group select {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: var(--font-sans);
+  background: var(--surface);
+}

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ウェルカム天使大作戦アプリ - 周期と排卵の記録</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hachi+Maru+Pop&family=Noto+Sans+JP:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- オンボーディング（初回のみ） -->
+  <div id="onboarding" class="onboarding">
+    <div class="onboarding-inner">
+      <h1 class="logo">ウェルカム天使大作戦アプリ</h1>
+      <p class="onboarding-lead">はじめに、周期の目安を教えてください</p>
+      <div class="form-group">
+        <label>平均生理周期（日） <input type="number" id="ob-cycle-length" min="21" max="45" value="28" /></label>
+      </div>
+      <div class="form-group">
+        <label>平均生理期間（日） <input type="number" id="ob-period-length" min="3" max="10" value="5" /></label>
+      </div>
+      <div class="form-group">
+        <label>直近の生理開始日 <input type="date" id="ob-last-period-start" /></label>
+      </div>
+      <p class="onboarding-note">通知はブラウザ・端末の設定から行えます。</p>
+      <button type="button" id="onboarding-done" class="btn-primary">はじめる</button>
+    </div>
+  </div>
+
+  <div class="app" id="main-app">
+    <header class="header">
+      <h1 class="logo">ウェルカム天使大作戦アプリ</h1>
+      <nav class="nav">
+        <button type="button" class="nav-btn active" data-view="dashboard">ホーム</button>
+        <button type="button" class="nav-btn" data-view="calendar">カレンダー</button>
+        <button type="button" class="nav-btn" data-view="temperature">基礎体温</button>
+        <button type="button" class="nav-btn" data-view="visits">通院記録</button>
+        <button type="button" class="nav-btn" data-view="chat">AIチャット</button>
+        <button type="button" class="nav-btn" data-view="settings">設定</button>
+      </nav>
+    </header>
+
+    <main class="main">
+      <!-- ダッシュボード -->
+      <section id="view-dashboard" class="view active">
+        <div class="card today-card">
+          <h2>今日の状態</h2>
+          <div id="today-cycle-day" class="today-cycle-day-banner"></div>
+          <div id="today-phase-bar" class="today-phase-bar"></div>
+          <div class="today-bbt-box">
+            <div class="today-bbt-inline">
+              <label for="quick-bbt">基礎体温 (℃)</label>
+              <input type="number" id="quick-bbt" step="0.01" min="35" max="40" placeholder="36.36" />
+              <button type="button" id="save-bbt-btn" class="btn-primary">記録する</button>
+            </div>
+            <p id="quick-bbt-msg" class="msg"></p>
+          </div>
+          <div id="today-status" class="today-status today-status-panel">読み込み中...</div>
+          <div id="next-period" class="next-period"></div>
+          <div id="today-hormone-table-wrap" class="today-hormone-table-wrap"></div>
+          <div id="today-ai-advice" class="today-ai-advice"></div>
+          <button type="button" id="today-ai-btn" class="today-ai-btn">アドバイスを表示</button>
+          <p id="today-ai-msg" class="msg"></p>
+        </div>
+      </section>
+
+      <!-- カレンダー -->
+      <section id="view-calendar" class="view">
+        <div class="card calendar-card">
+          <div class="calendar-header">
+            <button type="button" id="cal-prev" class="cal-nav">‹</button>
+            <h2 id="cal-title">2025年1月</h2>
+            <button type="button" id="cal-next" class="cal-nav">›</button>
+          </div>
+          <div class="calendar-legend">
+            <span class="leg leg-period">生理予定</span>
+            <span class="leg leg-fertile">妊娠しやすい時期</span>
+            <span class="leg leg-ovulation">排卵予定日</span>
+            <span class="leg leg-period-recorded">生理実測</span>
+            <span class="leg leg-ovulation-recorded">排卵日</span>
+          </div>
+          <div id="calendar-grid" class="calendar-grid"></div>
+          <div id="cal-popover" class="cal-popover" role="dialog" aria-label="日付の記録">
+            <p class="cal-popover-title">この日を</p>
+            <button type="button" class="cal-popover-btn" data-action="period">生理</button>
+            <button type="button" class="cal-popover-btn" data-action="ovulation">排卵日</button>
+            <button type="button" class="cal-popover-btn" data-action="detail" id="cal-popover-detail-btn">その日の記録</button>
+          </div>
+          <div id="day-record-modal" class="day-record-modal" aria-hidden="true">
+            <div class="day-record-backdrop"></div>
+            <div class="day-record-sheet">
+              <div class="day-record-header">
+                <h3 id="day-record-title">〇月〇日の記録</h3>
+                <button type="button" id="day-record-close" class="day-record-close">×</button>
+              </div>
+              <div class="day-record-body">
+                <input type="hidden" id="day-record-date" />
+                <div class="day-record-row">
+                  <span class="day-record-label">体温</span>
+                  <input type="number" id="day-record-bbt" step="0.01" min="35" max="40" placeholder="36.36" /> ℃
+                </div>
+                <div class="day-record-row">
+                  <span class="day-record-label">体調</span>
+                  <div class="day-record-chips" id="day-record-symptoms"></div>
+                </div>
+                <div class="day-record-row">
+                  <span class="day-record-label">おりもの</span>
+                  <div class="day-record-chips" id="day-record-discharge"></div>
+                </div>
+                <div class="day-record-row">
+                  <span class="day-record-label">排卵検査薬</span>
+                  <div class="day-record-chips" id="day-record-ovulation"></div>
+                  <input type="file" id="day-record-ovulation-photo" accept="image/*" class="day-record-photo-input" />
+                  <button type="button" id="day-record-ovulation-photo-btn" class="btn-chip">写真を追加</button>
+                  <div id="day-record-ovulation-preview" class="day-record-photo-preview"></div>
+                </div>
+                <div class="day-record-row">
+                  <span class="day-record-label">性交</span>
+                  <button type="button" id="day-record-timing" class="btn-chip">記録</button>
+                </div>
+                <div class="day-record-row">
+                  <span class="day-record-label">服薬</span>
+                  <div id="day-record-meds"></div>
+                  <div class="day-record-med-chips" id="day-record-med-preset"></div>
+                  <input type="text" id="day-record-med-input" placeholder="薬・サプリ名" />
+                  <button type="button" id="day-record-med-add" class="btn-chip">追加</button>
+                </div>
+              </div>
+              <button type="button" id="day-record-save" class="btn-primary">保存して閉じる</button>
+            </div>
+          </div>
+        </div>
+        <div class="card calendar-phase-card">
+          <h2>周期の目安<span class="calendar-phase-hint">（自分で入力した値でカレンダー予定を更新）</span></h2>
+          <div class="phase-table-wrap">
+            <table class="phase-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th class="phase-th">平均日数実測</th>
+                  <th class="phase-th">自分で入力</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="phase-label-cell">低温期の目安</td>
+                  <td class="phase-avg-cell" id="cal-avg-follicular">—</td>
+                  <td class="phase-input-cell"><label><input type="number" id="cal-follicular-days" min="10" max="30" /> 日</label></td>
+                </tr>
+                <tr>
+                  <td class="phase-label-cell">高温期の目安</td>
+                  <td class="phase-avg-cell" id="cal-avg-luteal">—</td>
+                  <td class="phase-input-cell"><label><input type="number" id="cal-luteal-days" min="10" max="18" /> 日</label></td>
+                </tr>
+                <tr>
+                  <td class="phase-label-cell">今周期の予測</td>
+                  <td class="phase-avg-cell" id="cal-avg-cycle">—</td>
+                  <td class="phase-input-cell"><label><input type="number" id="cal-cycle-days" min="21" max="45" /> 日</label></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <button type="button" id="cal-phase-save-btn" class="btn-secondary">反映する</button>
+        </div>
+      </section>
+
+      <!-- AIチャット -->
+      <section id="view-chat" class="view">
+        <div class="card chat-card">
+          <h2>AIチャット</h2>
+          <p class="description">妊活について気軽に相談できます。医療助言は行いません。気になる症状がある場合は受診をお勧めします。</p>
+          <div id="chat-messages" class="chat-messages"></div>
+          <div class="chat-input-row">
+            <input type="text" id="chat-input" class="chat-input" placeholder="メッセージを入力..." maxlength="500" />
+            <button type="button" id="chat-send-btn" class="chat-send-btn">送信</button>
+          </div>
+          <button type="button" id="chat-clear-btn" class="btn-chip">会話をクリア</button>
+        </div>
+      </section>
+
+      <!-- 基礎体温 -->
+      <section id="view-temperature" class="view">
+        <div class="card">
+          <h2>基礎体温の記録</h2>
+          <div class="bbt-form">
+            <label>日付 <input type="date" id="bbt-date" /></label>
+            <label>体温 (℃) <input type="number" id="bbt-value" step="0.01" min="35" max="40" placeholder="36.36" /></label>
+            <button type="button" id="add-bbt-btn">追加</button>
+          </div>
+          <div id="bbt-chart-area" class="bbt-chart-area">
+            <p class="hint">記録を追加するとグラフが表示されます</p>
+          </div>
+          <div id="bbt-list" class="bbt-list"></div>
+        </div>
+      </section>
+
+      <!-- 通院記録 -->
+      <section id="view-visits" class="view">
+        <div class="card">
+          <h2>通院記録</h2>
+          <p class="description">受診内容や検査結果をメモしておけます。AIアドバイス・チャットで参照されます。</p>
+          <div class="visit-form">
+            <div class="form-group">
+              <label>日付 <input type="date" id="visit-date" /></label>
+            </div>
+            <div class="form-group">
+              <label>内容・メモ <textarea id="visit-content" rows="3" placeholder="受診した病院、診察内容、医師の説明など"></textarea></label>
+            </div>
+            <div class="form-group">
+              <label>検査結果 <textarea id="visit-results" rows="2" placeholder="血液検査、ホルモン値、その他の検査結果など"></textarea></label>
+            </div>
+            <div class="form-group">
+              <span class="visit-photo-label">検査結果の写真</span>
+              <input type="file" id="visit-results-photo" accept="image/*" class="visit-photo-input" />
+              <button type="button" id="visit-results-photo-btn" class="btn-chip">写真を追加</button>
+              <div id="visit-results-photo-preview" class="visit-photo-preview"></div>
+            </div>
+            <button type="button" id="visit-add-btn" class="btn-primary">追加</button>
+          </div>
+          <div id="visit-list" class="visit-list"></div>
+        </div>
+      </section>
+
+      <!-- 設定 -->
+      <section id="view-settings" class="view">
+        <div class="card">
+          <h2>周期の設定</h2>
+          <p class="description">生理周期に合わせて排卵予測の精度が上がります。低温期・高温期の日数は好みで変更できます。</p>
+          <div class="form-group">
+            <label>平均生理周期（日） <input type="number" id="cycle-length" min="21" max="45" value="28" /></label>
+          </div>
+          <div class="form-group">
+            <label>平均生理期間（日） <input type="number" id="period-length" min="3" max="10" value="5" /></label>
+          </div>
+          <div class="form-group">
+            <label>高温期（黄体期）の日数 <input type="number" id="luteal-days" min="10" max="18" value="14" /></label>
+            <span class="form-hint">排卵日＝周期－この日数で計算します</span>
+          </div>
+          <div class="form-group">
+            <label>直近の生理開始日 <input type="date" id="last-period-start" /></label>
+          </div>
+          <button type="button" id="save-settings-btn">保存</button>
+          <p id="settings-msg" class="msg"></p>
+        </div>
+        <div class="card">
+          <h2>AI設定</h2>
+          <p class="description">今日のアドバイスとチャットにはAIを使用します。APIキーは設定で入力してください（端末内に保存）。</p>
+          <div class="form-group">
+            <label>API提供元
+              <select id="ai-provider">
+                <option value="openai">OpenAI (GPT)</option>
+                <option value="gemini">Google Gemini</option>
+              </select>
+            </label>
+          </div>
+          <div class="form-group">
+            <label>APIキー <input type="password" id="ai-api-key" placeholder="sk-..." autocomplete="off" /></label>
+            <span class="form-hint">OpenAI: APIキーは OpenAI のサイトで取得。Gemini: Google AI Studio で取得（無料枠あり）</span>
+          </div>
+          <div class="form-group">
+            <label>モデル名 <input type="text" id="ai-model" placeholder="例: gpt-4o-mini または gemini-1.5-flash" /></label>
+          </div>
+          <button type="button" id="save-ai-settings-btn" class="btn-secondary">AI設定を保存</button>
+          <p id="ai-settings-msg" class="msg"></p>
+        </div>
+        <div class="card">
+          <h2>データのバックアップ</h2>
+          <p class="description">記録をファイルに保存したり、別の端末に移せます。PCで設定したデータをスマホに移すときは「取り込む」を使います。</p>
+          <button type="button" id="export-data-btn" class="btn-secondary">データを出力（JSON）</button>
+          <button type="button" id="backup-btn" class="btn-secondary">バックアップをダウンロード</button>
+          <input type="file" id="import-data-file" accept=".json,application/json" class="hidden" />
+          <button type="button" id="import-data-btn" class="btn-secondary">バックアップを取り込む</button>
+          <p id="import-data-msg" class="msg"></p>
+          <div class="share-url-box">
+            <button type="button" id="share-url-btn" class="btn-secondary">共有用URLを発行</button>
+            <p class="description">発行したURLをスマホで開くと、この端末のデータが自動で取り込まれます。写真は含まれません。</p>
+            <textarea id="share-url-output" class="share-url-output" readonly placeholder="「共有用URLを発行」を押すとここにURLが表示されます"></textarea>
+            <p id="share-url-msg" class="msg"></p>
+          </div>
+        </div>
+        <div class="card disclaimer">
+          <h2>ご利用にあたって</h2>
+          <p>本アプリの排卵日・生理予定は<strong>目安</strong>であり、医療行為ではありません。体調に不安がある場合は必ず医療機関を受診してください。</p>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
