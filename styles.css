@@ -965,6 +965,43 @@ body {
 .hormone-ref-table .col-phase { width: 28%; }
 .hormone-ref-table .col-e2, .hormone-ref-table .col-p4, .hormone-ref-table .col-lh { width: 24%; }
 
+.today-phase-days-table-wrap {
+  margin: 10px 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.phase-days-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  table-layout: fixed;
+}
+.phase-days-table th,
+.phase-days-table td {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+.phase-days-table thead th {
+  background: var(--accent-soft);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+}
+.phase-days-table .phase-days-th { text-align: center; }
+.phase-days-table .phase-days-label { width: 40%; color: var(--text); }
+.phase-days-table .phase-days-num {
+  width: 30%;
+  text-align: center;
+  color: var(--text);
+}
+.phase-days-table tbody tr.phase-days-current {
+  background: rgba(252, 229, 235, 0.5);
+  font-weight: 500;
+}
+
 .hormone-graph-svg {
   display: block;
   width: 100%;

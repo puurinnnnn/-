@@ -543,6 +543,87 @@
     return (d.getMonth() + 1) + "/" + d.getDate();
   }
 
+  function buildPhaseDaysTableHTML() {
+    const todayStr = formatDate(new Date());
+    const today = parseDate(todayStr);
+    const rows = [];
+    if (periodRecords.length === 0) {
+      const startStr = getEffectiveLastPeriodStart(today);
+      if (startStr) {
+        const startDate = parseDate(startStr);
+        if (startDate && today.getTime() >= startDate.getTime()) {
+          const lowDays = Math.round((today.getTime() - startDate.getTime()) / 86400000);
+          rows.push({
+            label: "1(" + (startDate.getMonth() + 1) + "/" + startDate.getDate() + ")",
+            lowDays,
+            highDays: null,
+            isCurrent: true,
+          });
+        }
+      }
+      if (rows.length === 0) return "";
+    } else {
+    for (let i = 0; i < periodRecords.length; i++) {
+      const startStr = periodRecords[i].start;
+      const nextStartStr = i > 0 ? periodRecords[i - 1].start : null;
+      const isCurrent = i === 0;
+      const startDate = parseDate(startStr);
+      if (!startDate) continue;
+      const cycleNumber = periodRecords.length - i;
+      const label = cycleNumber + "(" + (startDate.getMonth() + 1) + "/" + startDate.getDate() + ")";
+      let lowDays = null;
+      let highDays = null;
+      const ovInCycle = ovulationMarkedDates.find((d) => d >= startStr && (nextStartStr ? d < nextStartStr : d <= todayStr));
+      if (ovInCycle) {
+        const ovDate = parseDate(ovInCycle);
+        const startMs = startDate.getTime();
+        const ovMs = ovDate.getTime();
+        lowDays = Math.round((ovMs - startMs) / 86400000);
+        if (nextStartStr) {
+          const nextMs = parseDate(nextStartStr).getTime();
+          highDays = Math.round((nextMs - ovMs) / 86400000);
+        } else {
+          if (today.getTime() >= ovMs) {
+            highDays = Math.round((today.getTime() - ovMs) / 86400000);
+          }
+        }
+      } else if (isCurrent) {
+        const startMs = startDate.getTime();
+        const todayMs = today.getTime();
+        if (todayMs >= startMs) {
+          lowDays = Math.round((todayMs - startMs) / 86400000);
+        }
+      }
+      rows.push({
+        label,
+        lowDays,
+        highDays,
+        isCurrent,
+      });
+    }
+    }
+    let html =
+      "<table class=\"phase-days-table\" aria-label=\"低温期・高温期の日数\"><thead><tr><th></th><th class=\"phase-days-th\">低温期</th><th class=\"phase-days-th\">高温期</th></tr></thead><tbody>";
+    for (let r = 0; r < rows.length; r++) {
+      const row = rows[r];
+      const trClass = row.isCurrent ? " class=\"phase-days-current\"" : "";
+      const low = row.lowDays != null ? String(row.lowDays) : "—";
+      const high = row.highDays != null ? String(row.highDays) : "";
+      html +=
+        "<tr" +
+        trClass +
+        "><td class=\"phase-days-label\">" +
+        escapeHtml(row.label) +
+        "</td><td class=\"phase-days-num\">" +
+        escapeHtml(low) +
+        "</td><td class=\"phase-days-num\">" +
+        escapeHtml(high) +
+        "</td></tr>";
+    }
+    html += "</tbody></table>";
+    return html;
+  }
+
   function buildHormoneTableHTML(cycleDay) {
     const rows = [
       { phase: "月経期（1～5日目）", e2: "低い", p4: "低い", lh: "低い", dayFrom: 1, dayTo: 5 },
@@ -641,6 +722,8 @@
     if (!phase) {
       const hormoneTableEl = document.getElementById("today-hormone-table-wrap");
       if (hormoneTableEl) hormoneTableEl.innerHTML = "";
+      const phaseDaysTableEl = document.getElementById("today-phase-days-table-wrap");
+      if (phaseDaysTableEl) phaseDaysTableEl.innerHTML = "";
       const phaseBarEl = document.getElementById("today-phase-bar");
       if (phaseBarEl) phaseBarEl.innerHTML = "";
       statusEl.textContent = "カレンダーで日付をタップして生理日を記録するか、設定で直近の生理開始日を入力すると、今日の状態を表示できます。";
@@ -743,6 +826,9 @@
 
     const hormoneTableEl = document.getElementById("today-hormone-table-wrap");
     if (hormoneTableEl) hormoneTableEl.innerHTML = buildHormoneTableHTML(cycleDay);
+
+    const phaseDaysTableEl = document.getElementById("today-phase-days-table-wrap");
+    if (phaseDaysTableEl) phaseDaysTableEl.innerHTML = buildPhaseDaysTableHTML();
 
     nextEl.textContent = "次回生理予定: " + formatDate(phase.nextPeriodStart);
   }
