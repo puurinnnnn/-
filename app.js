@@ -478,9 +478,7 @@
     if (!dateObj) return;
     const date = new Date(dateObj);
     if (isNaN(date.getTime())) return;
-    const phaseForDate = getCyclePhase(new Date(date));
-    if (!phaseForDate) return;
-    const cycleDay = getCycleDay(date, phaseForDate);
+    const cycleDay = getCycleDayFromDate(date);
     if (typeof cycleDay !== "number" || cycleDay < 1) return;
     const dateStr = formatDate(date);
     const hasTiming = timingRecords.some((r) => r.date === dateStr);
@@ -509,6 +507,18 @@
     t.setHours(0, 0, 0, 0);
     s.setHours(0, 0, 0, 0);
     return Math.floor((t - s) / 86400000) + 1;
+  }
+
+  /** 実際の直近生理開始日からの経過日数（d1, d2, … d29 以降も続く） */
+  function getCycleDayFromDate(date) {
+    const startStr = getEffectiveLastPeriodStart(date);
+    const start = parseDate(startStr);
+    if (!start) return null;
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    start.setHours(0, 0, 0, 0);
+    const day = Math.floor((d - start) / 86400000) + 1;
+    return day < 1 ? null : day;
   }
 
   function getActualOvulationDate(phase) {
@@ -578,13 +588,16 @@
         const ovDate = parseDate(ovInCycle);
         const startMs = startDate.getTime();
         const ovMs = ovDate.getTime();
-        lowDays = Math.round((ovMs - startMs) / 86400000);
+        // 低温期: 生理開始〜排卵日を含む日数
+        lowDays = Math.floor((ovMs - startMs) / 86400000) + 1;
         if (nextStartStr) {
           const nextMs = parseDate(nextStartStr).getTime();
-          highDays = Math.round((nextMs - ovMs) / 86400000);
+          // 高温期: 排卵翌日を1日目として、生理開始の前日まで
+          highDays = Math.max(0, Math.floor((nextMs - ovMs) / 86400000) - 1);
         } else {
-          if (today.getTime() >= ovMs) {
-            highDays = Math.round((today.getTime() - ovMs) / 86400000);
+          // 現在周期: 排卵翌日を1日目として今日まで
+          if (today.getTime() > ovMs) {
+            highDays = Math.floor((today.getTime() - ovMs) / 86400000);
           }
         }
       } else if (isCurrent) {
@@ -731,7 +744,7 @@
       return;
     }
 
-    const cycleDay = getCycleDay(today, phase);
+    const cycleDay = getCycleDayFromDate(today);
     const luteal = settings.lutealPhaseDays ?? 14;
     const follicular = phase.cycleLength - luteal;
     const actualOv = getActualOvulationDate(phase);
@@ -810,7 +823,9 @@
         const w = "width:" + Math.max(0, pct).toFixed(1) + "%;";
         let inner = p.name;
         if (isCurrent && p.days > 0) {
-          const posPct = daysInPhase > 0 ? ((dayInPhase - 0.5) / daysInPhase * 100) : 50;
+          const posPct = daysInPhase > 0
+            ? Math.min(100, Math.max(0, (dayInPhase - 0.5) / daysInPhase * 100))
+            : 50;
           inner = p.name + "<span class=\"today-phase-marker\" style=\"left:" + posPct.toFixed(1) + "%\"></span>";
         }
         return "<span class=\"today-phase-seg " + p.className + (isCurrent ? " is-current" : "") + "\" style=\"" + w + "\">" + inner + "</span>";
@@ -1144,7 +1159,7 @@
 
     const first = new Date(year, month, 1);
     const last = new Date(year, month + 1, 0);
-    const startPad = (first.getDay() + 6) % 7;
+    const startPad = first.getDay();
     const daysInMonth = last.getDate();
     const totalCells = startPad + daysInMonth;
     const rows = Math.ceil(totalCells / 7);
@@ -1152,7 +1167,7 @@
     const grid = document.getElementById("calendar-grid");
     grid.innerHTML = "";
 
-    const weekDays = ["月", "火", "水", "木", "金", "土", "日"];
+    const weekDays = ["日", "月", "火", "水", "木", "金", "土"];
     weekDays.forEach((w) => {
       const h = document.createElement("div");
       h.className = "cal-day";
@@ -1488,11 +1503,11 @@
     titleEl.textContent = year + "年" + (month + 1) + "月";
     const first = new Date(year, month, 1);
     const last = new Date(year, month + 1, 0);
-    const startPad = (first.getDay() + 6) % 7;
+    const startPad = first.getDay();
     const daysInMonth = last.getDate();
     const rows = Math.ceil((startPad + daysInMonth) / 7);
     grid.innerHTML = "";
-    ["月", "火", "水", "木", "金", "土", "日"].forEach((w) => {
+    ["日", "月", "火", "水", "木", "金", "土"].forEach((w) => {
       const h = document.createElement("div");
       h.className = "cal-day";
       h.style.background = "transparent";
